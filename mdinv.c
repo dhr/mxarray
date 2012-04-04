@@ -1,15 +1,12 @@
 #include <mex.h>
 #include <string.h>
-
-#if 1
-  #define blas(func) func ## _
-#endif
+#include <lapack.h>
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   double *data, *dataEnd, *out, *work;
   const int *dims;
-  int *ipiv;
-  int ndims, m, n, dataInc, info;
+  ptrdiff_t *ipiv;
+  ptrdiff_t ndims, m, n, dataInc, info;
   
   if (nrhs != 1) mexErrMsgTxt("Exactly one argument is expected.");
   
@@ -24,7 +21,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   dataInc = n*n;
   dataEnd = data + mxGetNumberOfElements(prhs[0]);
   
-  ipiv = mxMalloc(n*sizeof(int));
+  ipiv = mxMalloc(n*sizeof(long));
   work = mxMalloc(n*sizeof(double));
   
   plhs[0] = mxCreateNumericArray(ndims, dims, mxDOUBLE_CLASS, mxREAL);
@@ -32,8 +29,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   
   for (; data < dataEnd; data += dataInc, out += dataInc) {
     memcpy(out, data, dataInc*sizeof(double));
-    blas(dgetrf)(&n, &n, out, &n, ipiv, &info);
-    blas(dgetri)(&n, out, &n, ipiv, work, &n, &info);
+    dgetrf(&n, &n, out, &n, ipiv, &info);
+    dgetri(&n, out, &n, ipiv, work, &n, &info);
   }
   
   mxFree(ipiv);

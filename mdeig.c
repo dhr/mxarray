@@ -1,19 +1,16 @@
 #include <mex.h>
 #include <string.h>
-
-#if 1
-  #define blas(func) func ## _
-#endif
+#include <lapack.h>
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   double *data, *dataTemp, *dataEnd;
   mxArray *eigvals, *eigvecs;
   double *evalsr, *evalsi, *evecsr, *evecsi, *evecsTemp, *work;
-  int m, n, ndims;
+  ptrdiff_t m, n, ndims;
   const int *dims;
   int *eigvalDims;
   int dataInc, evalInc, evecInc;
-  int lwork, info;
+  ptrdiff_t lwork, info;
   double *dummy;
   int count = 0;
   
@@ -60,8 +57,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     int i;
     
     memcpy(dataTemp, data, dataInc*sizeof(double));
-    blas(dgeev)("N", "V", &n, dataTemp, &n, evalsr, evalsi,
-                dummy, &n, evecsTemp, &n, work, &lwork, &info);
+    dgeev("N", "V", &n, dataTemp, &n, evalsr, evalsi,
+          dummy, &n, evecsTemp, &n, work, &lwork, &info);
     
     memcpy(evecsr, evecsTemp, evecInc*sizeof(double));
     for (i = 0; i < n; ++i) {

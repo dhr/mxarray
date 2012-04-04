@@ -47,7 +47,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   
   cndims = max(andims, bndims);
   cdims = mxMalloc(cndims*sizeof(int));
-  copyADims = (andims > bndims || asArentScalars && !bsArentScalars);
+  copyADims = (andims > bndims || (asArentScalars && !bsArentScalars));
   memcpy(cdims, copyADims ? adims : bdims, cndims*sizeof(int));
   plhs[0] = mxCreateNumericArray(cndims, cdims, mxDOUBLE_CLASS, mxREAL);
   cs = mxGetPr(plhs[0]);

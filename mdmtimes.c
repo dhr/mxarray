@@ -1,16 +1,13 @@
 #include <mex.h>
 #include <string.h>
-
-#if 1
-  #define blas(func) func ## _
-#endif
+#include <blas.h>
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   double *as, *asEnd, *bs, *bsEnd, *cs, *csEnd;
   double zero = 0, one = 1;
-  int andims, bndims, cndims, am, an, bm, bn;
+  ptrdiff_t andims, bndims, cndims, am, an, bm, bn;
   const int *adims, *bdims;
   int *cdims;
   int aInc, bInc, cInc;
@@ -62,7 +59,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   bsEnd = bs + mxGetNumberOfElements(prhs[1]);
   
   for (; as < asEnd && bs < bsEnd; as += aInc, bs += bInc, cs += cInc) {
-    blas(dgemm)("N", "N", &am, &bn, &an, &one, as, &am,
-                bs, &bm, &zero, cs, &am);
+    dgemm("N", "N", &am, &bn, &an, &one, as, &am,
+          bs, &bm, &zero, cs, &am);
   }
 }

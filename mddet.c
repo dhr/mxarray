@@ -1,15 +1,13 @@
 #include <mex.h>
 #include <string.h>
-
-#if 1
-  #define blas(func) func ## _
-#endif
+#include <lapack.h>
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   double *data, *dataEnd, *lu, *det;
   const int *dims;
-  int *detDims, *ipiv;
-  int ndims, m, n, dataInc, info;
+  int *detDims;
+  ptrdiff_t *ipiv;
+  ptrdiff_t ndims, m, n, dataInc, info;
   
   if (nrhs != 1) mexErrMsgTxt("Exactly one argument is expected.");
   
@@ -25,7 +23,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   dataEnd = data + mxGetNumberOfElements(prhs[0]);
   
   lu = mxMalloc(dataInc*sizeof(double));
-  ipiv = mxMalloc(n*sizeof(int));
+  ipiv = mxMalloc(n*sizeof(long));
   
   detDims = mxMalloc(ndims*sizeof(int));
   memcpy(detDims, dims, ndims*sizeof(int));
@@ -38,7 +36,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     int i;
     double detLcl = 1, *diag = lu;
     memcpy(lu, data, dataInc*sizeof(double));
-    blas(dgetrf)(&n, &n, lu, &n, ipiv, &info);
+    dgetrf(&n, &n, lu, &n, ipiv, &info);
     for (i = 0; i < n; ++i, diag += n + 1)
       detLcl *= ((ipiv[i] - 1) != i ? -1 : 1)*(*diag);
     *det = detLcl;
